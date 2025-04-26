@@ -1,95 +1,126 @@
 import * as React from 'react';
-import { View } from 'react-native';
-import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
-import { Info } from '~/lib/icons/Info';
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
-import { Button } from '~/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card';
-import { Progress } from '~/components/ui/progress';
-import { Text } from '~/components/ui/text';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
+import { FlatList, RefreshControl } from 'react-native';
+import { ClipboardProvider, useClipboard } from '~/service/ClipboardProvider';
+import { useClipboardHistory } from '~/service/ClipboardService';
+import { ClipboardItemProps } from '~/types/types';
+import ClipboardItem from '~/components/custom/ClipboardItem';
+import {Input} from '~/components/ui/input'
+import { useRoute } from '@react-navigation/native';
+import NoEntriesLayout from '~/components/custom/NoEntriesLayout';
+import { ClipboardScreenRouteProp } from '~/types/types';
+import { useAuth } from '~/auth/AuthProvider';
+import { useSettings } from '~/lib/hooks/useSettings';
 
-const GITHUB_AVATAR_URI =
-  'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
+const ClipboardList: React.FC<{
+  data: ClipboardItemProps[];
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onToggleFavorite: (id: string) => void;
+  onTag: (id: string) => void;
+  onToggleCloud: (id: string, user: string) => void;
+  onRefresh: () => void;
+}> = ({ data, onEdit, onDelete, onToggleFavorite, onTag, onToggleCloud, onRefresh }) => {
 
-export default function Screen() {
-  const [progress, setProgress] = React.useState(78);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
 
-  function updateProgressValue() {
-    setProgress(Math.floor(Math.random() * 100));
-  }
+  const route = useRoute<ClipboardScreenRouteProp>();
+  const showSearch = route.params?.showSearch;
+
+  React.useEffect(() => {
+    if (!showSearch) {
+      setSearchTerm('');
+    }
+  }, [showSearch]);
+
+  // const {initializeClipboardHistory} = useClipboard()
+
+  const filteredData = React.useMemo(() => {
+    return data.filter(item => 
+      item.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [data, searchTerm]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await onRefresh();
+    setRefreshing(false);
+  };
+
   return (
-    <View className='flex-1 justify-center items-center gap-5 p-6 bg-secondary/30'>
-      <Card className='w-full max-w-sm p-6 rounded-2xl'>
-        <CardHeader className='items-center'>
-          <Avatar alt="Rick Sanchez's Avatar" className='w-24 h-24'>
-            <AvatarImage source={{ uri: GITHUB_AVATAR_URI }} />
-            <AvatarFallback>
-              <Text>RS</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View className='p-3' />
-          <CardTitle className='pb-2 text-center'>Rick Sanchez</CardTitle>
-          <View className='flex-row'>
-            <CardDescription className='text-base font-semibold'>Scientist</CardDescription>
-            <Tooltip delayDuration={150}>
-              <TooltipTrigger className='px-2 pb-0.5 active:opacity-50'>
-                <Info size={14} strokeWidth={2.5} className='w-4 h-4 text-foreground/70' />
-              </TooltipTrigger>
-              <TooltipContent className='py-2 px-4 shadow'>
-                <Text className='native:text-lg'>Freelance</Text>
-              </TooltipContent>
-            </Tooltip>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <View className='flex-row justify-around gap-3'>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Dimension</Text>
-              <Text className='text-xl font-semibold'>C-137</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Age</Text>
-              <Text className='text-xl font-semibold'>70</Text>
-            </View>
-            <View className='items-center'>
-              <Text className='text-sm text-muted-foreground'>Species</Text>
-              <Text className='text-xl font-semibold'>Human</Text>
-            </View>
-          </View>
-        </CardContent>
-        <CardFooter className='flex-col gap-3 pb-0'>
-          <View className='flex-row items-center overflow-hidden'>
-            <Text className='text-sm text-muted-foreground'>Productivity:</Text>
-            <LayoutAnimationConfig skipEntering>
-              <Animated.View
-                key={progress}
-                entering={FadeInUp}
-                exiting={FadeOutDown}
-                className='w-11 items-center'
-              >
-                <Text className='text-sm font-bold text-sky-600'>{progress}%</Text>
-              </Animated.View>
-            </LayoutAnimationConfig>
-          </View>
-          <Progress value={progress} className='h-2' indicatorClassName='bg-sky-600' />
-          <View />
-          <Button
-            variant='outline'
-            className='shadow shadow-foreground/5'
-            onPress={updateProgressValue}
-          >
-            <Text>Update</Text>
-          </Button>
-        </CardFooter>
-      </Card>
-    </View>
+    <>
+      {showSearch && (
+        <Input
+          placeholder="Search clips..."
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          clearButtonMode="while-editing"
+          autoFocus
+          className="mx-4 my-2"
+        />
+      )}
+    <FlatList
+      data={filteredData}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <ClipboardItem
+          item={item}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleFavorite={onToggleFavorite}
+          onTag={onTag}
+          onToggleCloud={onToggleCloud}
+        />
+      )}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={['grey']}
+          progressBackgroundColor={'black'}
+        />
+      }
+      contentContainerStyle={{ gap: 0 }}
+    />
+    </>
   );
-}
+};
+
+const ClipboardScreen: React.FC = () => {
+  const route = useRoute<ClipboardScreenRouteProp>();
+  const sublabel = route.params?.sublabel || "all"; // Default to "all"
+  const {user} = useAuth()
+  const {settings} = useSettings()
+  
+  const { clipboardHistory, deleteClipboardItem, toggleFavorite, toggleCloud, initializeHistory } = useClipboardHistory(user);
+
+  React.useEffect(() => {
+    initializeHistory();
+  }, [settings]); 
+
+
+  // Filter clipboard items based on selected sublabel
+  const filteredClipboardHistory = clipboardHistory.filter((item) => {
+    if (sublabel === "favorites") return item.favorite;
+    if (sublabel === "cloud") return item.isInCloud;
+    return true; // Show all items if "all"
+  });
+
+  const handleRefresh = async () => {
+    await initializeHistory();
+  };
+
+  return (
+    <ClipboardProvider>
+      {filteredClipboardHistory.length > 0 ? (
+        <ClipboardList data={filteredClipboardHistory} onEdit={() => {}} onDelete={deleteClipboardItem} onToggleFavorite={toggleFavorite} onTag={() => {}} onToggleCloud={toggleCloud} onRefresh={handleRefresh}/>
+      ) : (
+        <NoEntriesLayout />
+      )}
+    </ClipboardProvider>
+  );
+};
+
+
+export default ClipboardScreen;
