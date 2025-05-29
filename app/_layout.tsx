@@ -56,6 +56,12 @@ const DARK_THEME: Theme = {
 
 export { ErrorBoundary } from "expo-router";
 
+const usePlatformSpecificSetup = Platform.select({
+  web: useSetWebBackgroundClassName,
+  android: useSetAndroidNavigationBar,
+  default: noop,
+});
+
 export default function RootLayout() {
   return (
     <AuthProvider>
