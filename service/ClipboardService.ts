@@ -1,11 +1,13 @@
-import * as Clipboard from 'expo-clipboard';
-import { useEffect, useState, useRef } from 'react';
+import * as Clipboard from "expo-clipboard";
+import { useEffect, useRef, useState } from "react";
+import { tags } from "react-native-svg/lib/typescript/xmlTags";
+
 import { db } from "~/auth/AuthProvider";
-import { useSettings } from '~/lib/hooks/useSettings';
-import { clipboardStorage } from './storage';
-import { cloudService } from './cloud';
-import { ClipboardItemProps } from '~/types/types';
-import { tags } from 'react-native-svg/lib/typescript/xmlTags';
+import { useSettings } from "~/lib/hooks/useSettings";
+import { ClipboardItemProps } from "~/types/types";
+
+import { cloudService } from "./cloud";
+import { clipboardStorage } from "./storage";
 
 const POLLING_INTERVAL = 2000;
 
@@ -14,23 +16,19 @@ export function useClipboardHistory(user: string | null) {
   const [lastDeletedText, setLastDeletedText] = useState<string | null>(null);
   const lastCopiedText = useRef<string | null>(null);
   const { settings } = useSettings();
-  
-    const { data } = db.useQuery({
-      entries: {
 
-      }
-    });
+  const { data } = db.useQuery({
+    entries: {},
+  });
 
   useEffect(() => {
     if (data?.entries) {
-      setClipboardHistory(prevHistory => {
+      setClipboardHistory((prevHistory) => {
         const cloudEntries = Object.values(data.entries).map(cloudService.transformCloudEntry);
-        
+
         // Update existing items with cloud data
-        const updatedHistory = prevHistory.map(item => {
-          const cloudItem = cloudEntries.find(
-            cloudItem => cloudItem.id === item.id
-          );
+        const updatedHistory = prevHistory.map((item) => {
+          const cloudItem = cloudEntries.find((cloudItem) => cloudItem.id === item.id);
           return cloudItem ? { ...cloudItem, isInCloud: true } : item;
         });
 
@@ -39,10 +37,13 @@ export function useClipboardHistory(user: string | null) {
     }
   }, [data?.entries]);
 
-  const mergeHistories = (local: ClipboardItemProps[], cloud: ClipboardItemProps[]): ClipboardItemProps[] => {
+  const mergeHistories = (
+    local: ClipboardItemProps[],
+    cloud: ClipboardItemProps[],
+  ): ClipboardItemProps[] => {
     const merged = [...local];
-    const cloudMap = new Map(cloud.map(item => [item.id, item]));
-    
+    const cloudMap = new Map(cloud.map((item) => [item.id, item]));
+
     for (let i = 0; i < merged.length; i++) {
       const cloudItem = cloudMap.get(merged[i].id);
       if (cloudItem) {
@@ -50,9 +51,9 @@ export function useClipboardHistory(user: string | null) {
         cloudMap.delete(merged[i].id);
       }
     }
-    
+
     merged.push(...cloudMap.values());
-    
+
     return merged;
   };
 
@@ -60,19 +61,17 @@ export function useClipboardHistory(user: string | null) {
     try {
       const [localHistory, cloudEntries] = await Promise.all([
         clipboardStorage.load(user),
-        data?.entries ? Object.values(data.entries).map(cloudService.transformCloudEntry) : []
+        data?.entries ? Object.values(data.entries).map(cloudService.transformCloudEntry) : [],
       ]);
 
       const allEntries = mergeHistories(localHistory, cloudEntries);
       setClipboardHistory(allEntries);
     } catch (error) {
-      console.error('Error initializing clipboard history:', error);
+      console.error("Error initializing clipboard history:", error);
     }
   };
 
   useEffect(() => {
-
-
     initializeHistory();
   }, [user, data]);
 
@@ -90,11 +89,11 @@ export function useClipboardHistory(user: string | null) {
           favorite: false,
           tags: [],
           timestamp: new Date(),
-          isInCloud: settings.storageLocation.value === 'cloud'
+          isInCloud: settings.storageLocation.value === "cloud",
         };
 
-        setClipboardHistory(prev => {
-          if (prev.some(item => item.text === text)) return prev;
+        setClipboardHistory((prev) => {
+          if (prev.some((item) => item.text === text)) return prev;
           const updated = [newItem, ...prev];
           clipboardStorage.save(updated, user);
           return updated;
@@ -102,11 +101,11 @@ export function useClipboardHistory(user: string | null) {
 
         lastCopiedText.current = text;
 
-        if (settings.storageLocation.value === 'cloud' && user && user !== 'guest') {
+        if (settings.storageLocation.value === "cloud" && user && user !== "guest") {
           await cloudService.add(newItem, user);
         }
       } catch (error) {
-        console.error('Error monitoring clipboard:', error);
+        console.error("Error monitoring clipboard:", error);
       }
     };
 
@@ -116,9 +115,9 @@ export function useClipboardHistory(user: string | null) {
 
   const handlers = {
     async toggleCloud(id: string) {
-      if (!user || user === 'guest') return;
-      
-      const item = clipboardHistory.find(item => item.id === id);
+      if (!user || user === "guest") return;
+
+      const item = clipboardHistory.find((item) => item.id === id);
       if (!item) return;
 
       try {
@@ -128,34 +127,34 @@ export function useClipboardHistory(user: string | null) {
           await cloudService.add(item, user);
         }
 
-        setClipboardHistory(items => {
-          const updated = items.map(item => 
-            item.id === id ? { ...item, isInCloud: !item.isInCloud } : item
+        setClipboardHistory((items) => {
+          const updated = items.map((item) =>
+            item.id === id ? { ...item, isInCloud: !item.isInCloud } : item,
           );
           clipboardStorage.save(updated, user);
           return updated;
         });
       } catch (error) {
-        console.error('Error toggling cloud status:', error);
+        console.error("Error toggling cloud status:", error);
       }
     },
 
     deleteClipboardItem(id: string) {
-      setClipboardHistory(items => {
-        const item = items.find(item => item.id === id);
+      setClipboardHistory((items) => {
+        const item = items.find((item) => item.id === id);
         if (!item || item.favorite) return items;
 
         setLastDeletedText(item.text);
-        const updated = items.filter(item => item.id !== id);
+        const updated = items.filter((item) => item.id !== id);
         clipboardStorage.save(updated, user);
         return updated;
       });
     },
 
     toggleFavorite(id: string) {
-      setClipboardHistory(items => {
-        const updated = items.map(item =>
-          item.id === id ? { ...item, favorite: !item.favorite } : item
+      setClipboardHistory((items) => {
+        const updated = items.map((item) =>
+          item.id === id ? { ...item, favorite: !item.favorite } : item,
         );
         clipboardStorage.save(updated, user);
         return updated;
@@ -163,19 +162,17 @@ export function useClipboardHistory(user: string | null) {
     },
 
     updateTags(id: string, tags: string[]) {
-      setClipboardHistory(items => {
-        const updated = items.map(item =>
-          item.id === id ? { ...item, tags } : item
-        );
+      setClipboardHistory((items) => {
+        const updated = items.map((item) => (item.id === id ? { ...item, tags } : item));
         clipboardStorage.save(updated, user);
         return updated;
       });
-    }
+    },
   };
 
   return {
     clipboardHistory,
     initializeHistory,
-    ...handlers
+    ...handlers,
   };
 }

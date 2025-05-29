@@ -1,24 +1,25 @@
-import React from "react";
-import { Linking, View, TouchableOpacity, Image } from "react-native";
-import {Text} from '~/components/ui/text'
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import React from "react";
+import { Image, Linking, TouchableOpacity, View } from "react-native";
+
 import { useAuth } from "~/auth/AuthProvider";
+import { Text } from "~/components/ui/text";
 
 const CustomDrawer = (props: any) => {
   const { signOut, user } = useAuth();
 
   const handleOpenChangeLogURL = () => {
-    console.log('helo')
-    Linking.openURL('https://github.com/ayoung19/clipboard-history/releases')
-  }
+    console.log("helo");
+    Linking.openURL("https://github.com/ayoung19/clipboard-history/releases");
+  };
 
   const handleOpenSupportDevelopmentURL = () => {
     // Linking.openURL('https://github.com/ayoung19/clipboard-history/releases')
-  }
+  };
 
   const handleOpenHelpAndFeedbackURL = () => {
     // Linking.openURL('https://github.com/ayoung19/clipboard-history/releases')
-  }
+  };
   return (
     <View style={{ flex: 1 }}>
       {/* Header Section */}
@@ -36,18 +37,24 @@ const CustomDrawer = (props: any) => {
       </DrawerContentScrollView>
 
       {/* Footer Section */}
-        <TouchableOpacity onPress={() => handleOpenChangeLogURL} style={{ paddingVertical: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 16 }}>Changelog</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleOpenSupportDevelopmentURL} style={{ paddingVertical: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 16 }}>Support Development</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleOpenHelpAndFeedbackURL} style={{ paddingVertical: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 16 }}>Help and Feedback</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => signOut()} style={{ paddingVertical: 10 }}>
-          <Text style={{ textAlign: "center", fontSize: 16 }}>Logout</Text>
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleOpenChangeLogURL} style={{ paddingVertical: 10 }}>
+        <Text style={{ textAlign: "center", fontSize: 16 }}>Changelog</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => handleOpenSupportDevelopmentURL}
+        style={{ paddingVertical: 10 }}
+      >
+        <Text style={{ textAlign: "center", fontSize: 16 }}>Support Development</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => handleOpenHelpAndFeedbackURL}
+        style={{ paddingVertical: 10 }}
+      >
+        <Text style={{ textAlign: "center", fontSize: 16 }}>Help and Feedback</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => signOut()} style={{ paddingVertical: 10 }}>
+        <Text style={{ textAlign: "center", fontSize: 16 }}>Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 };

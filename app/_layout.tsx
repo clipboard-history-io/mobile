@@ -1,21 +1,23 @@
 import "~/global.css";
 
+import { createDrawerNavigator, DrawerNavigationProp } from "@react-navigation/drawer";
 import {
   DarkTheme,
   DefaultTheme,
+  ParamListBase,
   Theme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
+import { PortalHost } from "@rn-primitives/portal";
 import { StatusBar } from "expo-status-bar";
+import { Menu, X } from "lucide-react-native";
 import * as React from "react";
 import { Platform, TouchableOpacity, View } from "react-native";
-import { NAV_THEME } from "~/lib/constants";
-import { useColorScheme } from "~/lib/hooks/useColorScheme";
-import { PortalHost } from "@rn-primitives/portal";
-import { Text } from "~/components/ui/text";
-import { X } from 'lucide-react-native';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { AuthProvider, useAuth } from "~/auth/AuthProvider";
+import CustomDrawer from "~/components/custom/CustomDrawer";
 import {
   Select,
   SelectContent,
@@ -24,23 +26,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Text } from "~/components/ui/text";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
-import { Menu } from "lucide-react-native";
-import { Search } from "~/lib/icons/Search";
+import { NAV_THEME } from "~/lib/constants";
+import { useColorScheme } from "~/lib/hooks/useColorScheme";
+import { useSettings } from "~/lib/hooks/useSettings";
 import { ClipboardList } from "~/lib/icons/ClipboardList";
 import { Cloud } from "~/lib/icons/Cloud";
+import { Search } from "~/lib/icons/Search";
 import { Star } from "~/lib/icons/Star";
+import { TabOption } from "~/types/types";
+
 import ClipboardScreen from "./index";
 import Settings from "./settings";
-import CustomDrawer from "~/components/custom/CustomDrawer";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { ParamListBase } from "@react-navigation/native";
-import { AuthProvider, useAuth } from "~/auth/AuthProvider";
 import SignInScreen from "./sign-in";
 import VerifyEmail from "./verifyEmail";
-import { useSettings } from "~/lib/hooks/useSettings";
-import { TabOption } from "~/types/types";
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -73,12 +73,12 @@ export default function RootLayout() {
 function RootNavigator() {
   const hasMounted = React.useRef(false);
   const { colorScheme, isDarkColorScheme } = useColorScheme();
-  
+
   const { user } = useAuth();
   const { settings } = useSettings();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  
-  type TabValue = 'all' | 'favorites' | 'cloud';
+
+  type TabValue = "all" | "favorites" | "cloud";
 
   const [selectedSublabel, setSelectedSublabel] = React.useState({
     value: settings.defaultTab.value,
@@ -89,7 +89,7 @@ function RootNavigator() {
   React.useEffect(() => {
     setSelectedSublabel({
       value: settings.defaultTab.value as TabValue,
-      label: settings.defaultTab.label
+      label: settings.defaultTab.label,
     });
   }, [settings.defaultTab]);
 
@@ -110,19 +110,15 @@ function RootNavigator() {
     return null;
   }
 
-
-
-  const customHeader = (
-    label: string,
-    navigation: DrawerNavigationProp<ParamListBase>
-  ) => {
-
-    const tabOptions = React.useMemo(() => [
-      { label: "All", value: "all" },
-      { label: "Favorites", value: "favorites" },
-      { label: "Cloud", value: "cloud" }
-    ], []);
-
+  const customHeader = (label: string, navigation: DrawerNavigationProp<ParamListBase>) => {
+    const tabOptions = React.useMemo(
+      () => [
+        { label: "All", value: "all" },
+        { label: "Favorites", value: "favorites" },
+        { label: "Cloud", value: "cloud" },
+      ],
+      [],
+    );
 
     const renderIcon = () => {
       switch (selectedSublabel.value) {
@@ -137,23 +133,26 @@ function RootNavigator() {
       }
     };
 
-    const handleTabChange = React.useCallback((value: { label?: string; value?: string }) => {
-      const newValue: TabOption = {
-        label: value?.label ?? settings.defaultTab.label,
-        value: (value?.value as TabValue) ?? settings.defaultTab.value,
-      };
-      setSelectedSublabel(newValue);
-      navigation.setParams({ 
-        sublabel: newValue.value,
-        showSearch: isSearchVisible,
-      });
-    }, [navigation, isSearchVisible]);
+    const handleTabChange = React.useCallback(
+      (value: { label?: string; value?: string }) => {
+        const newValue: TabOption = {
+          label: value?.label ?? settings.defaultTab.label,
+          value: (value?.value as TabValue) ?? settings.defaultTab.value,
+        };
+        setSelectedSublabel(newValue);
+        navigation.setParams({
+          sublabel: newValue.value,
+          showSearch: isSearchVisible,
+        });
+      },
+      [navigation, isSearchVisible],
+    );
 
     return (
       <View className="flex flex-row items-center">
         <Text className="text-2xl font-bold px-4 mr-4">{label}</Text>
         {renderIcon()}
-                <Select
+        <Select
           value={selectedSublabel}
           onValueChange={(option) => handleTabChange(option as TabOption)}
           defaultValue={settings.defaultTab}
@@ -167,11 +166,7 @@ function RootNavigator() {
           <SelectContent className="w-36">
             <SelectGroup>
               {tabOptions.map((option) => (
-                <SelectItem 
-                  key={option.value} 
-                  label={option.label} 
-                  value={option.value} 
-                />
+                <SelectItem key={option.value} label={option.label} value={option.value} />
               ))}
             </SelectGroup>
           </SelectContent>
@@ -207,37 +202,35 @@ function RootNavigator() {
             headerTitleStyle: {
               marginLeft: 16,
             },
-            
-          })
-        
-        } drawerContent={(props) => <CustomDrawer {...props} />}
+          })}
+          drawerContent={(props) => <CustomDrawer {...props} />}
         >
           <Drawer.Screen
             name="index"
             component={ClipboardScreen}
             // initialParams={{ sublabel: selectedSublabel.value }}
-            initialParams={{ 
+            initialParams={{
               sublabel: selectedSublabel.value,
               showSearch: isSearchVisible,
-              settings: settings 
+              settings: settings,
             }}
             options={({ navigation }) => ({
               title: "Home",
               headerTitle: () => customHeader("Home", navigation),
               headerRight: () => (
                 <TouchableOpacity
-    onPress={() => {
-      setIsSearchVisible(!isSearchVisible);
-      navigation.setParams({ showSearch: !isSearchVisible });
-    }}
-    style={{ paddingRight: 16 }}
-  >
-    {isSearchVisible ? (
-      <X size={24} color={isDarkColorScheme ? "white" : "black"} />
-    ) : (
-      <Search size={24} color={isDarkColorScheme ? "white" : "black"} />
-    )}
-  </TouchableOpacity>
+                  onPress={() => {
+                    setIsSearchVisible(!isSearchVisible);
+                    navigation.setParams({ showSearch: !isSearchVisible });
+                  }}
+                  style={{ paddingRight: 16 }}
+                >
+                  {isSearchVisible ? (
+                    <X size={24} color={isDarkColorScheme ? "white" : "black"} />
+                  ) : (
+                    <Search size={24} color={isDarkColorScheme ? "white" : "black"} />
+                  )}
+                </TouchableOpacity>
               ),
             })}
           />
@@ -252,6 +245,4 @@ function RootNavigator() {
 }
 
 const useIsomorphicLayoutEffect =
-  Platform.OS === "web" && typeof window === "undefined"
-    ? React.useEffect
-    : React.useLayoutEffect;
+  Platform.OS === "web" && typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;

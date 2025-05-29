@@ -1,19 +1,13 @@
+import { useRoute } from "@react-navigation/native";
 import React, { useRef, useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Alert,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native";
-import { Input, DocumentSelectionState } from "~/components/ui/input";
+import { Alert, Keyboard, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+
+import { useAuth, type VerifyEmailRouteProp } from "~/auth/AuthProvider";
+import { DocumentSelectionState, Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
-import { useRoute } from '@react-navigation/native';
-import { useAuth } from "~/auth/AuthProvider";
-import {type VerifyEmailRouteProp} from '~/auth/AuthProvider'
 
 export default function VerifyEmail() {
-    const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
   const { verifyCode } = useAuth();
   const route = useRoute<VerifyEmailRouteProp>();
   const { email } = route.params;
@@ -27,8 +21,8 @@ export default function VerifyEmail() {
     setCode(newCode);
 
     if (value && index < inputRefs.current.length - 1) {
-        inputRefs.current[index + 1]?.focus();
-      }
+      inputRefs.current[index + 1]?.focus();
+    }
   }
 
   async function handleVerify() {
@@ -57,9 +51,7 @@ export default function VerifyEmail() {
           We've sent a 6-digit code to your email.
         </Text>
         <View className="flex flex-row mb-4">
-
-        
-        {code.map((digit, index) => (
+          {code.map((digit, index) => (
             <Input
               key={index}
               ref={(ref) => (inputRefs.current[index] = ref)}
@@ -72,7 +64,7 @@ export default function VerifyEmail() {
               autoFocus={index === 0}
             />
           ))}
-          </View>
+        </View>
         <TouchableOpacity
           onPress={handleVerify}
           className="bg-blue-500 py-3 px-6 rounded-md w-full items-center"

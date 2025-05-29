@@ -1,15 +1,15 @@
-import * as React from 'react';
-import { FlatList, RefreshControl } from 'react-native';
-import { ClipboardProvider, useClipboard } from '~/service/ClipboardProvider';
-import { useClipboardHistory } from '~/service/ClipboardService';
-import { ClipboardItemProps } from '~/types/types';
-import ClipboardItem from '~/components/custom/ClipboardItem';
-import {Input} from '~/components/ui/input'
-import { useRoute } from '@react-navigation/native';
-import NoEntriesLayout from '~/components/custom/NoEntriesLayout';
-import { ClipboardScreenRouteProp } from '~/types/types';
-import { useAuth } from '~/auth/AuthProvider';
-import { useSettings } from '~/lib/hooks/useSettings';
+import { useRoute } from "@react-navigation/native";
+import * as React from "react";
+import { FlatList, RefreshControl } from "react-native";
+
+import { useAuth } from "~/auth/AuthProvider";
+import ClipboardItem from "~/components/custom/ClipboardItem";
+import NoEntriesLayout from "~/components/custom/NoEntriesLayout";
+import { Input } from "~/components/ui/input";
+import { useSettings } from "~/lib/hooks/useSettings";
+import { ClipboardProvider, useClipboard } from "~/service/ClipboardProvider";
+import { useClipboardHistory } from "~/service/ClipboardService";
+import { ClipboardItemProps, ClipboardScreenRouteProp } from "~/types/types";
 
 const ClipboardList: React.FC<{
   data: ClipboardItemProps[];
@@ -20,25 +20,25 @@ const ClipboardList: React.FC<{
   onToggleCloud: (id: string, user: string) => void;
   onRefresh: () => void;
 }> = ({ data, onEdit, onDelete, onToggleFavorite, onTag, onToggleCloud, onRefresh }) => {
-
   const [refreshing, setRefreshing] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState("");
 
   const route = useRoute<ClipboardScreenRouteProp>();
   const showSearch = route.params?.showSearch;
 
   React.useEffect(() => {
     if (!showSearch) {
-      setSearchTerm('');
+      setSearchTerm("");
     }
   }, [showSearch]);
 
   // const {initializeClipboardHistory} = useClipboard()
 
   const filteredData = React.useMemo(() => {
-    return data.filter(item => 
-      item.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    return data.filter(
+      (item) =>
+        item.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
     );
   }, [data, searchTerm]);
 
@@ -60,29 +60,29 @@ const ClipboardList: React.FC<{
           className="mx-4 my-2"
         />
       )}
-    <FlatList
-      data={filteredData}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <ClipboardItem
-          item={item}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onToggleFavorite={onToggleFavorite}
-          onTag={onTag}
-          onToggleCloud={onToggleCloud}
-        />
-      )}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={['grey']}
-          progressBackgroundColor={'black'}
-        />
-      }
-      contentContainerStyle={{ gap: 0 }}
-    />
+      <FlatList
+        data={filteredData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <ClipboardItem
+            item={item}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleFavorite={onToggleFavorite}
+            onTag={onTag}
+            onToggleCloud={onToggleCloud}
+          />
+        )}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["grey"]}
+            progressBackgroundColor={"black"}
+          />
+        }
+        contentContainerStyle={{ gap: 0 }}
+      />
     </>
   );
 };
@@ -90,15 +90,15 @@ const ClipboardList: React.FC<{
 const ClipboardScreen: React.FC = () => {
   const route = useRoute<ClipboardScreenRouteProp>();
   const sublabel = route.params?.sublabel || "all"; // Default to "all"
-  const {user} = useAuth()
-  const {settings} = useSettings()
-  
-  const { clipboardHistory, deleteClipboardItem, toggleFavorite, toggleCloud, initializeHistory } = useClipboardHistory(user);
+  const { user } = useAuth();
+  const { settings } = useSettings();
+
+  const { clipboardHistory, deleteClipboardItem, toggleFavorite, toggleCloud, initializeHistory } =
+    useClipboardHistory(user);
 
   React.useEffect(() => {
     initializeHistory();
-  }, [settings]); 
-
+  }, [settings]);
 
   // Filter clipboard items based on selected sublabel
   const filteredClipboardHistory = clipboardHistory.filter((item) => {
@@ -114,13 +114,20 @@ const ClipboardScreen: React.FC = () => {
   return (
     <ClipboardProvider>
       {filteredClipboardHistory.length > 0 ? (
-        <ClipboardList data={filteredClipboardHistory} onEdit={() => {}} onDelete={deleteClipboardItem} onToggleFavorite={toggleFavorite} onTag={() => {}} onToggleCloud={toggleCloud} onRefresh={handleRefresh}/>
+        <ClipboardList
+          data={filteredClipboardHistory}
+          onEdit={() => {}}
+          onDelete={deleteClipboardItem}
+          onToggleFavorite={toggleFavorite}
+          onTag={() => {}}
+          onToggleCloud={toggleCloud}
+          onRefresh={handleRefresh}
+        />
       ) : (
         <NoEntriesLayout />
       )}
     </ClipboardProvider>
   );
 };
-
 
 export default ClipboardScreen;

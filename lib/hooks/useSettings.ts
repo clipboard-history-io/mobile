@@ -1,14 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import {Settings, ThemeOption, StorageOption, TabOption} from '~/types/types'
 
+import { Settings, StorageOption, TabOption, ThemeOption } from "~/types/types";
 
 const SETTINGS_STORAGE_KEY = "app_settings";
 
 const defaultSettings: Settings = {
   allowBlankItems: false,
   storageLocation: { label: "Local", value: "local" },
-  defaultTab: {label: "All", value: "all"},
+  defaultTab: { label: "All", value: "all" },
   theme: { label: "System", value: "system" },
   allowDeletingFavorites: false,
   allowDeletingCloudItems: false,
@@ -17,8 +17,6 @@ const defaultSettings: Settings = {
 export function useSettings() {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
-
-
 
   const loadSettings = async () => {
     try {
@@ -33,10 +31,10 @@ export function useSettings() {
     }
   };
 
-    // Load settings on mount
-    useEffect(() => {
-      loadSettings();
-    }, []);
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
   const saveSettings = async (newSettings: Settings) => {
     try {
@@ -50,7 +48,7 @@ export function useSettings() {
   const updateSettings = async (updates: Partial<Settings>) => {
     const newSettings = {
       ...settings,
-      ...updates
+      ...updates,
     };
     await saveSettings(newSettings);
   };
@@ -87,6 +85,6 @@ export function useSettings() {
     setAllowDeletingCloudItems,
     setStorageLocation,
     setDefaultTab,
-    setTheme
+    setTheme,
   };
 }

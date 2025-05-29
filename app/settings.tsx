@@ -1,6 +1,5 @@
 import { ScrollView, View } from "react-native";
-import { Text } from "~/components/ui/text";
-import { Switch } from "~/components/ui/switch";
+
 import {
   Select,
   SelectContent,
@@ -9,10 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
+import { Text } from "~/components/ui/text";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { useColorScheme } from "~/lib/hooks/useColorScheme";
 import { useSettings } from "~/lib/hooks/useSettings";
-import { ThemeOption, StorageOption, TabOption } from "~/types/types";
+import { StorageOption, TabOption, ThemeOption } from "~/types/types";
 
 const storageOptions: StorageOption[] = [
   { label: "Local", value: "local" },
@@ -20,10 +21,10 @@ const storageOptions: StorageOption[] = [
 ];
 
 const tabOptions: TabOption[] = [
-  {label: "All", value: "all"},
-  {label: "Favorites", value: "favorites"},
-  {label: "Cloud", value: "cloud"}
-]
+  { label: "All", value: "all" },
+  { label: "Favorites", value: "favorites" },
+  { label: "Cloud", value: "cloud" },
+];
 
 const themeOptions: ThemeOption[] = [
   { label: "Dark", value: "dark" },
@@ -58,9 +59,7 @@ since the items will be fixed and few */
       <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
         <View>
           <Text className="text-lg font-medium">Theme Toggle</Text>
-          <Text className="text-sm text-muted-foreground">
-            Toggle light/dark mode
-          </Text>
+          <Text className="text-sm text-muted-foreground">Toggle light/dark mode</Text>
         </View>
         <Select
           value={settings.theme}
@@ -75,11 +74,7 @@ since the items will be fixed and few */
           <SelectContent className="w-36 bg-background">
             <SelectGroup>
               {themeOptions.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  label={option.label}
-                  value={option.value}
-                />
+                <SelectItem key={option.value} label={option.label} value={option.value} />
               ))}
             </SelectGroup>
           </SelectContent>
@@ -91,30 +86,19 @@ since the items will be fixed and few */
       <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
         <View>
           <Text className="text-lg font-medium">Default Storage Location</Text>
-          <Text className="text-sm text-muted-foreground">
-            Select where new items are stored
-          </Text>
+          <Text className="text-sm text-muted-foreground">Select where new items are stored</Text>
         </View>
         <Select
           value={settings.storageLocation}
-          onValueChange={(option) =>
-            setStorageLocation(option as StorageOption)
-          }
+          onValueChange={(option) => setStorageLocation(option as StorageOption)}
         >
           <SelectTrigger className="w-32 bg-background">
-            <SelectValue
-              className="text-foreground text-sm native:text-lg"
-              placeholder="Select"
-            />
+            <SelectValue className="text-foreground text-sm native:text-lg" placeholder="Select" />
           </SelectTrigger>
           <SelectContent className="w-36 bg-background">
             <SelectGroup>
               {storageOptions.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  label={option.label}
-                  value={option.value}
-                />
+                <SelectItem key={option.value} label={option.label} value={option.value} />
               ))}
             </SelectGroup>
           </SelectContent>
@@ -126,9 +110,7 @@ since the items will be fixed and few */
       <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
         <View>
           <Text className="text-lg font-medium">Allow Blank Items</Text>
-          <Text className="text-sm text-muted-foreground">
-            Enable or disable blank items
-          </Text>
+          <Text className="text-sm text-muted-foreground">Enable or disable blank items</Text>
         </View>
         <Switch
           checked={settings.allowBlankItems}
@@ -157,9 +139,7 @@ since the items will be fixed and few */
       {/* Allow deleting cloud items */}
       <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
         <View>
-          <Text className="text-lg font-medium">
-            Allow Deleting Cloud Items
-          </Text>
+          <Text className="text-lg font-medium">Allow Deleting Cloud Items</Text>
           <Text className="text-sm text-muted-foreground">
             Enable or disable deleting items stored in cloud
           </Text>
@@ -172,34 +152,23 @@ since the items will be fixed and few */
       </View>
       <View className="h-[1px] bg-border w-full my-1" />
 
-            {/* Default Tab Toggle */}
-            <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
+      {/* Default Tab Toggle */}
+      <View className="flex-1 p-4 mb-2 flex-row items-center justify-between">
         <View>
           <Text className="text-lg font-medium">Default Tab</Text>
-          <Text className="text-sm text-muted-foreground">
-            Select tab shown when app is opened
-          </Text>
+          <Text className="text-sm text-muted-foreground">Select tab shown when app is opened</Text>
         </View>
         <Select
           value={settings.defaultTab}
-          onValueChange={(option) =>
-            setDefaultTab(option as TabOption)
-          }
+          onValueChange={(option) => setDefaultTab(option as TabOption)}
         >
           <SelectTrigger className="w-32 bg-background">
-            <SelectValue
-              className="text-foreground text-sm native:text-lg"
-              placeholder="Select"
-            />
+            <SelectValue className="text-foreground text-sm native:text-lg" placeholder="Select" />
           </SelectTrigger>
           <SelectContent className="w-36 bg-background">
             <SelectGroup>
               {tabOptions.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  label={option.label}
-                  value={option.value}
-                />
+                <SelectItem key={option.value} label={option.label} value={option.value} />
               ))}
             </SelectGroup>
           </SelectContent>
