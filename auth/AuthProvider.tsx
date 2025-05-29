@@ -18,13 +18,18 @@ type RootStackParamList = {
   verifyEmail: { email: string };
 };
 
-// type VerifyEmailScreenProps = NativeStackScreenProps<RootStackParamList, 'verifyEmail'>;
 export type VerifyEmailRouteProp = RouteProp<RootStackParamList, 'verifyEmail'>;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const APP_ID = "e1b6a4c7-bd57-4f53-924b-55c69612e0b1";
-export const db = init({ appId: APP_ID, schema: schema });
+if (!process.env.EXPO_PUBLIC_INSTANT_APP_ID) {
+  throw new Error('EXPO_PUBLIC_INSTANT_APP_ID is not defined in environment variables');
+}
+
+export const db = init({ 
+  appId: process.env.EXPO_PUBLIC_INSTANT_APP_ID, 
+  schema: schema 
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<string | null>(null);
