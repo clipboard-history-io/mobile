@@ -7,7 +7,6 @@ import { useAuth } from "~/auth/AuthProvider";
 import { Badge } from "~/components/ui/badge";
 import { CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { useSettings } from "~/lib/hooks/useSettings";
 import { Cloud } from "~/lib/icons/Cloud";
 import { CloudOff } from "~/lib/icons/CloudOff";
 import { Edit } from "~/lib/icons/Edit";
@@ -27,7 +26,6 @@ const ClipboardItem: React.FC<{
   onToggleCloud: (id: string, user: string) => void;
 }> = ({ item, onEdit, onDelete, onToggleFavorite, onTag, onToggleCloud }) => {
   const { user } = useAuth();
-  const { settings } = useSettings();
 
   const colors = [
     "#ef4444", // red
@@ -56,23 +54,6 @@ const ClipboardItem: React.FC<{
     }
     onToggleCloud(id, user);
   };
-
-  const isDeleteDisabled = React.useMemo(() => {
-    if (!settings.allowDeletingFavorites && item.favorite) {
-      return true;
-    }
-
-    if (!settings.allowDeletingCloudItems && item.isInCloud) {
-      return true;
-    }
-
-    return false;
-  }, [
-    settings.allowDeletingFavorites,
-    settings.allowDeletingCloudItems,
-    item.favorite,
-    item.isInCloud,
-  ]);
 
   const dotColor = React.useMemo(() => getRandomColor(), [item.id]);
   // console.log('ClipboardItem received:', {
@@ -139,11 +120,7 @@ const ClipboardItem: React.FC<{
           />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => onDelete(item.id)}
-          disabled={isDeleteDisabled}
-          className={isDeleteDisabled ? "opacity-50" : ""}
-        >
+        <TouchableOpacity onPress={() => onDelete(item.id)}>
           <Trash2 size={18} className="text-red-500" />
         </TouchableOpacity>
       </CardFooter>

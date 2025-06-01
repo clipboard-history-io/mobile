@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { tags } from "react-native-svg/lib/typescript/xmlTags";
 
 import { db } from "~/auth/AuthProvider";
-import { useSettings } from "~/lib/hooks/useSettings";
 import { ClipboardItemProps } from "~/types/types";
 
 import { cloudService } from "./cloud";
@@ -15,7 +14,6 @@ export function useClipboardHistory(user: string | null) {
   const [clipboardHistory, setClipboardHistory] = useState<ClipboardItemProps[]>([]);
   const [lastDeletedText, setLastDeletedText] = useState<string | null>(null);
   const lastCopiedText = useRef<string | null>(null);
-  const { settings } = useSettings();
 
   const { data } = db.useQuery({
     entries: {},
@@ -78,9 +76,8 @@ export function useClipboardHistory(user: string | null) {
   useEffect(() => {
     const checkClipboard = async () => {
       try {
-        const text = (await Clipboard.getStringAsync()).trim();
+        const text = "".trim();
         if (!text || text === lastCopiedText.current || text === lastDeletedText) return;
-        if (!settings.allowBlankItems && !text.trim()) return;
 
         const newItem: ClipboardItemProps = {
           id: Date.now().toString(),
@@ -89,7 +86,7 @@ export function useClipboardHistory(user: string | null) {
           favorite: false,
           tags: [],
           timestamp: new Date(),
-          isInCloud: settings.storageLocation.value === "cloud",
+          isInCloud: true,
         };
 
         setClipboardHistory((prev) => {
@@ -101,7 +98,7 @@ export function useClipboardHistory(user: string | null) {
 
         lastCopiedText.current = text;
 
-        if (settings.storageLocation.value === "cloud" && user && user !== "guest") {
+        if (user && user !== "guest") {
           await cloudService.add(newItem, user);
         }
       } catch (error) {
@@ -111,7 +108,7 @@ export function useClipboardHistory(user: string | null) {
 
     const interval = setInterval(checkClipboard, POLLING_INTERVAL);
     return () => clearInterval(interval);
-  }, [lastDeletedText, settings, user]);
+  }, [lastDeletedText, user]);
 
   const handlers = {
     async toggleCloud(id: string) {

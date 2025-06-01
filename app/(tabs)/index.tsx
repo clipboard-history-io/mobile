@@ -6,7 +6,6 @@ import { useAuth } from "~/auth/AuthProvider";
 import ClipboardItem from "~/components/custom/ClipboardItem";
 import NoEntriesLayout from "~/components/custom/NoEntriesLayout";
 import { Input } from "~/components/ui/input";
-import { useSettings } from "~/lib/hooks/useSettings";
 import { ClipboardProvider, useClipboard } from "~/service/ClipboardProvider";
 import { useClipboardHistory } from "~/service/ClipboardService";
 import { ClipboardItemProps, ClipboardScreenRouteProp } from "~/types/types";
@@ -91,14 +90,13 @@ const ClipboardScreen: React.FC = () => {
   const route = useRoute<ClipboardScreenRouteProp>();
   const sublabel = route.params?.sublabel || "all"; // Default to "all"
   const { user } = useAuth();
-  const { settings } = useSettings();
 
   const { clipboardHistory, deleteClipboardItem, toggleFavorite, toggleCloud, initializeHistory } =
     useClipboardHistory(user);
 
   React.useEffect(() => {
     initializeHistory();
-  }, [settings]);
+  }, []);
 
   // Filter clipboard items based on selected sublabel
   const filteredClipboardHistory = clipboardHistory.filter((item) => {
