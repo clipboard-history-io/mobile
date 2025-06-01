@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Clipboard History Mobile",
-    "slug": "clipboard-history-mobile",
+    "name": "Clipboard History IO Mobile",
+    "slug": "clipboard-history-io-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

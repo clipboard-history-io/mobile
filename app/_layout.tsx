@@ -5,12 +5,12 @@ import { PortalHost } from "@rn-primitives/portal";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Appearance, Platform, View } from "react-native";
+import { ActivityIndicator, Appearance, Platform, View } from "react-native";
 
 import { AuthProvider } from "~/auth/AuthProvider";
-import { ThemeToggle } from "~/components/custom/ThemeToggle";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
+import { db } from "~/lib/db";
 import { useColorScheme } from "~/lib/hooks/useColorScheme";
 
 const LIGHT_THEME: Theme = {
@@ -41,20 +41,34 @@ export default function RootLayout() {
     <AuthProvider>
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{
-              title: "Starter Base",
-              headerRight: () => <ThemeToggle />,
-            }}
-          />
-        </Stack>
+        <RootStack />
         <PortalHost />
       </ThemeProvider>
     </AuthProvider>
   );
 }
+
+const RootStack = () => {
+  const auth = db.useAuth();
+
+  if (auth.isLoading || auth.error) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack>
+      {auth.user ? (
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      ) : (
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+      )}
+    </Stack>
+  );
+};
 
 const useIsomorphicLayoutEffect =
   Platform.OS === "web" && typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;

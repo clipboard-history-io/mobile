@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import React from "react";
+import { Label } from "@rn-primitives/select";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -12,45 +11,47 @@ import {
 } from "react-native";
 import { z } from "zod";
 
+import { db } from "~/auth/AuthProvider";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
-import { db } from "~/lib/db";
 
 const schema = z.object({
-  email: z.string(),
+  code: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 
-export default function SignInScreen() {
+export default function VerifyEmailScreen() {
+  const { email } = useLocalSearchParams<{ email?: string }>();
   const router = useRouter();
 
   const {
     control,
     setError,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
-      email: "",
+      code: "",
     },
     mode: "all",
     resolver: zodResolver(schema),
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async ({ email }) => {
+  const onSubmit: SubmitHandler<FormValues> = async ({ code }) => {
     try {
-      await db.auth.sendMagicCode({ email });
+      await db.auth.signInWithMagicCode({ email: email || "", code });
     } catch (e) {
       console.log(e);
 
-      setError("email", { type: "manual", message: "Invalid email" });
+      setError("code", { type: "manual", message: "Invalid code" });
+      setValue("code", "");
 
       return;
     }
 
-    router.navigate(`/verify-email?${new URLSearchParams({ email }).toString()}`);
+    router.navigate("/(tabs)");
   };
 
   return (
@@ -60,34 +61,28 @@ export default function SignInScreen() {
     >
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View className="flex-1 justify-center px-8">
-          <Image
-            source={require("~/assets/images/icon.png")}
-            style={{ width: 80, height: 80 }}
-            className="mx-auto"
-          />
-          <Text className="text-2xl font-bold text-center">
-            Sign in to Clipboard History IO Pro
-          </Text>
+          <Text className="text-2xl font-bold text-center">Check your email</Text>
           <Text className="text-lg text-gray-500 text-center">
-            Welcome! Please enter your email to continue
+            to continue to Clipboard History IO Pro
           </Text>
+          {/* TODO: Pin input UI. */}
           <Controller
-            name="email"
+            name="code"
             control={control}
             render={({ field: { value, onChange, onBlur, name } }) => (
               <>
-                <Label nativeID={name}>Email address</Label>
+                <Label nativeID={name}>Verification code</Label>
                 <Input
                   aria-labelledby={name}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
+                  keyboardType="number-pad"
+                  maxLength={6}
                   className="w-full"
                 />
-                {errors.email?.message && (
-                  <Text className="text-md font-semibold text-red-500">{errors.email.message}</Text>
+                {errors.code?.message && (
+                  <Text className="text-md font-semibold text-red-500">{errors.code.message}</Text>
                 )}
               </>
             )}
@@ -95,6 +90,7 @@ export default function SignInScreen() {
           <Button onPress={() => handleSubmit(onSubmit)()} className="w-full">
             <Text>Continue</Text>
           </Button>
+          {/* TODO: Resend code option? */}
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

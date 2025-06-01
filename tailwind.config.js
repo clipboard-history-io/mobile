@@ -1,3 +1,4 @@
+// TODO: Sort classNames.
 const { hairlineWidth } = require("nativewind/theme");
 
 /** @type {import('tailwindcss').Config} */
