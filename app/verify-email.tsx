@@ -82,6 +82,7 @@ export default function VerifyEmailScreen() {
                   className="w-full"
                 />
                 {errors.code?.message && (
+                  // TODO: text-md doesn't exist.
                   <Text className="text-md font-semibold text-red-500">{errors.code.message}</Text>
                 )}
               </>

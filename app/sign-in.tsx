@@ -62,7 +62,7 @@ export default function SignInScreen() {
         <View className="flex-1 justify-center px-8">
           <Image
             source={require("~/assets/images/icon.png")}
-            style={{ width: 80, height: 80 }}
+            style={{ width: 72, height: 72 }}
             className="mx-auto"
           />
           <Text className="text-2xl font-bold text-center">
