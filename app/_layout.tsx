@@ -2,6 +2,7 @@ import "~/global.css";
 
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
@@ -12,6 +13,7 @@ import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { db } from "~/lib/db";
 import { useColorScheme } from "~/lib/hooks/useColorScheme";
+import { useSettingsQuery } from "~/lib/hooks/useSettingsQuery";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -33,25 +35,28 @@ const usePlatformSpecificSetup = Platform.select({
   default: noop,
 });
 
+const queryClient = new QueryClient();
+
 export default function RootLayout() {
   usePlatformSpecificSetup();
-  const { isDarkColorScheme } = useColorScheme();
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <RootStack />
-        <PortalHost />
-      </ThemeProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
 const RootStack = () => {
-  const auth = db.useAuth();
+  const { isDarkColorScheme } = useColorScheme();
 
-  if (auth.isLoading || auth.error) {
+  const auth = db.useAuth();
+  // Syncs nativewind colorScheme to theme stored in settings.
+  const settingsQuery = useSettingsQuery();
+
+  if (auth.isLoading || auth.error || settingsQuery.isPending || settingsQuery.error) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
@@ -60,13 +65,17 @@ const RootStack = () => {
   }
 
   return (
-    <Stack>
-      {auth.user ? (
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      ) : (
-        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-      )}
-    </Stack>
+    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+      <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+      <Stack>
+        {auth.user ? (
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        ) : (
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+        )}
+      </Stack>
+      <PortalHost />
+    </ThemeProvider>
   );
 };
 

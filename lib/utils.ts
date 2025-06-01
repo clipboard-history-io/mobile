@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const capitalize = (s: string) =>
+  s.slice(0, 1).toUpperCase().concat(s.slice(1).toLowerCase());
+
 export const formatTimestamp = (timestamp: Date) => {
   const now = new Date();
   const date = new Date(timestamp);
