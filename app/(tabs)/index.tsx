@@ -7,7 +7,12 @@ import * as Crypto from "expo-crypto";
 import { useEffect } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
+import Reanimated, {
+  Extrapolation,
+  interpolate,
+  SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { z } from "zod";
 
 import { Badge } from "~/components/ui/badge";
@@ -21,24 +26,59 @@ import { useSettingsQuery } from "~/lib/hooks/useSettingsQuery";
 import { Settings } from "~/lib/types/settings";
 import { badgeDateFormatter, cn, getEntryTimestamp } from "~/lib/utils";
 
-function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
-  const styleAnimation = useAnimatedStyle(() => {
+interface RightActionsProps {
+  translation: SharedValue<number>;
+  cloudEntry: InstaQLEntity<AppSchema, "entries">;
+}
+
+const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
+  const editActionStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: drag.value + 168 }],
+      transform: [
+        {
+          translateX: interpolate(translation.value, [0, -168], [168, 0], Extrapolation.CLAMP),
+        },
+      ],
+    };
+  });
+
+  const deleteActionStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: interpolate(translation.value, [0, -168], [168, 84], Extrapolation.CLAMP) },
+      ],
     };
   });
 
   return (
-    <Reanimated.View style={styleAnimation} className="w-48 flex-row">
-      <View className="flex-1 flex-col justify-center bg-blue-100 px-4">
-        <Text className="text-center text-blue-500 font-bold">Edit</Text>
-      </View>
-      <View className="flex-1 flex-col justify-center bg-red-100 px-4">
-        <Text className="text-center text-red-500 font-bold">Delete</Text>
-      </View>
-    </Reanimated.View>
+    <View className="relative w-48">
+      <Reanimated.View style={editActionStyle} className="absolute w-24 h-full">
+        <View className="flex-row items-center h-full bg-blue-100">
+          <Text className="w-full text-center font-bold text-blue-500">Edit</Text>
+        </View>
+      </Reanimated.View>
+      <Reanimated.View style={deleteActionStyle} className="absolute w-24 h-full">
+        <Pressable
+          onPress={() => {
+            if (cloudEntry.isFavorited) {
+              return;
+            }
+
+            db.transact(db.tx.entries[cloudEntry.id].delete());
+          }}
+        >
+          {({ pressed }) => (
+            <View
+              className={cn("flex-row items-center h-full", pressed ? "bg-red-200" : "bg-red-100")}
+            >
+              <Text className="w-full text-center font-bold text-red-500">Delete</Text>
+            </View>
+          )}
+        </Pressable>
+      </Reanimated.View>
+    </View>
   );
-}
+};
 
 interface ItemProps {
   cloudEntry: InstaQLEntity<AppSchema, "entries">;
@@ -56,7 +96,12 @@ const Item = ({ cloudEntry, settings, clipboardContent }: ItemProps) => {
 
   return (
     <>
-      <Swipeable renderRightActions={RightAction}>
+      <Swipeable
+        overshootRight={false}
+        renderRightActions={(_, translation) => (
+          <RightActions translation={translation} cloudEntry={cloudEntry} />
+        )}
+      >
         <Pressable
           onPress={() => {
             Clipboard.setStringAsync(cloudEntry.content);
