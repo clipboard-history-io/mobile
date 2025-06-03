@@ -2,14 +2,13 @@ import "~/global.css";
 
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { ActivityIndicator, Appearance, Platform, View } from "react-native";
+import { ActivityIndicator, Appearance, AppState, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { AuthProvider } from "~/auth/AuthProvider";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { db } from "~/lib/db";
@@ -41,11 +40,20 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   usePlatformSpecificSetup();
 
+  // https://tanstack.com/query/latest/docs/framework/react/react-native#refetch-on-app-focus
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status) => {
+      if (Platform.OS !== "web") {
+        focusManager.setFocused(status === "active");
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RootStack />
-      </AuthProvider>
+      <RootStack />
     </QueryClientProvider>
   );
 }

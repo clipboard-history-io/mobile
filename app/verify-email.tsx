@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { z } from "zod";
 
-import { db } from "~/auth/AuthProvider";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
+import { db } from "~/lib/db";
 
 const schema = z.object({
   code: z.string(),

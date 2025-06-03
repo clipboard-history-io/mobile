@@ -1,32 +1,25 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { InstaQLEntity } from "@instantdb/react-native";
+import { InstaQLEntity, lookup } from "@instantdb/react-native";
 import { generateColorRGB } from "@marko19907/string-to-color";
-import { Star, Trash2 } from "lucide-react-native";
-import * as React from "react";
-import { useRef } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Gesture } from "react-native-gesture-handler";
-import Swipeable, { SwipeableRef } from "react-native-gesture-handler/ReanimatedSwipeable";
+import { useQueryClient } from "@tanstack/react-query";
+import * as Clipboard from "expo-clipboard";
+import * as Crypto from "expo-crypto";
+import { useEffect } from "react";
+import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, { SharedValue, useAnimatedStyle } from "react-native-reanimated";
 import { z } from "zod";
 
 import { Badge } from "~/components/ui/badge";
-import { CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { AppSchema } from "~/instant.schema";
 import { db } from "~/lib/db";
+import { useClipboardContentQuery } from "~/lib/hooks/useClipboardContentQuery";
 import { useCloudEntriesQuery } from "~/lib/hooks/useCloudEntriesQuery";
 import { useSettingsQuery } from "~/lib/hooks/useSettingsQuery";
 import { Settings } from "~/lib/types/settings";
-import { badgeDateFormatter, getEntryTimestamp } from "~/lib/utils";
+import { badgeDateFormatter, cn, getEntryTimestamp } from "~/lib/utils";
 
 function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
   const styleAnimation = useAnimatedStyle(() => {
@@ -50,10 +43,11 @@ function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
 interface ItemProps {
   cloudEntry: InstaQLEntity<AppSchema, "entries">;
   settings: Settings;
+  clipboardContent: string;
 }
 
-const Item = ({ cloudEntry, settings }: ItemProps) => {
-  const ref: SwipeableRef = useRef(null);
+const Item = ({ cloudEntry, settings, clipboardContent }: ItemProps) => {
+  const queryClient = useQueryClient();
 
   const tags = z
     .array(z.string())
@@ -62,53 +56,91 @@ const Item = ({ cloudEntry, settings }: ItemProps) => {
 
   return (
     <>
-      <Swipeable ref={ref} renderRightActions={RightAction}>
-        <View className="bg-background flex-col px-5 py-3 gap-1">
-          <View className="flex-row justify-between items-center gap-2">
-            <Text numberOfLines={1} ellipsizeMode="tail" className="text-base flex-1">
-              {cloudEntry.content}
-            </Text>
-            <Text className="text-sm text-muted-foreground">
-              {badgeDateFormatter(new Date(), new Date(getEntryTimestamp(cloudEntry, settings)))}
-            </Text>
-          </View>
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row gap-2">
-              <Text className="text-sm text-muted-foreground">
-                {cloudEntry.content.length} characters
+      <Swipeable renderRightActions={RightAction}>
+        <Pressable
+          onPress={() => {
+            Clipboard.setStringAsync(cloudEntry.content);
+            queryClient.setQueryData(["clipboardContent"], () => cloudEntry.content);
+          }}
+        >
+          <View className="bg-background flex-col px-5 py-3 gap-1">
+            <View className="flex-row justify-between items-center gap-2">
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className={cn("flex-1", cloudEntry.content === clipboardContent && "text-blue-500")}
+              >
+                {cloudEntry.content}
               </Text>
-              {tags.length > 0
-                ? tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="flex-row items-center">
-                      <View
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: 4,
-                          backgroundColor: generateColorRGB(tag),
-                          marginRight: 6,
-                        }}
-                      />
-                      <Text className="mt-[-1px]">{tag}</Text>
-                    </Badge>
-                  ))
-                : null}
+              <Text
+                className={cn(
+                  "text-sm",
+                  cloudEntry.content === clipboardContent
+                    ? "text-blue-500"
+                    : "text-muted-foreground",
+                )}
+              >
+                {cloudEntry.content === clipboardContent ? (
+                  <Badge className="bg-blue-500">
+                    <Text>Copied</Text>
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    <Text>
+                      {badgeDateFormatter(
+                        new Date(),
+                        new Date(getEntryTimestamp(cloudEntry, settings)),
+                      )}
+                    </Text>
+                  </Badge>
+                )}
+              </Text>
             </View>
-            <Pressable
-              onPress={() =>
-                db.transact(
-                  db.tx.entries[cloudEntry.id].update({ isFavorited: !cloudEntry.isFavorited }),
-                )
-              }
-            >
-              {cloudEntry.isFavorited ? (
-                <FontAwesome size={16} name="star" color="#fcc800" />
-              ) : (
-                <FontAwesome size={16} name="star-o" />
-              )}
-            </Pressable>
+            <View className="flex-row justify-between items-center">
+              <View className="flex-row gap-2">
+                <Text
+                  className={cn(
+                    "text-sm",
+                    cloudEntry.content === clipboardContent
+                      ? "text-blue-500"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {cloudEntry.content.length} characters
+                </Text>
+                {tags.length > 0
+                  ? tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="flex-row items-center">
+                        <View
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: generateColorRGB(tag),
+                            marginRight: 6,
+                          }}
+                        />
+                        <Text className="mt-[-1px]">{tag}</Text>
+                      </Badge>
+                    ))
+                  : null}
+              </View>
+              <Pressable
+                onPress={() =>
+                  db.transact(
+                    db.tx.entries[cloudEntry.id].update({ isFavorited: !cloudEntry.isFavorited }),
+                  )
+                }
+              >
+                {cloudEntry.isFavorited ? (
+                  <FontAwesome size={16} name="star" color="#fcc800" />
+                ) : (
+                  <FontAwesome size={16} name="star-o" />
+                )}
+              </Pressable>
+            </View>
           </View>
-        </View>
+        </Pressable>
       </Swipeable>
       <Separator />
     </>
@@ -116,14 +148,53 @@ const Item = ({ cloudEntry, settings }: ItemProps) => {
 };
 
 export default function HomeScreen() {
+  const connectionStatus = db.useConnectionStatus();
+  const { user } = db.useAuth();
   const cloudEntriesQuery = useCloudEntriesQuery();
   const settingsQuery = useSettingsQuery();
+  const clipboardContent = useClipboardContentQuery();
+
+  // Create new entry if clipboard content doesn't exist.
+  useEffect(() => {
+    (async () => {
+      if (
+        connectionStatus !== "authenticated" ||
+        !user?.email ||
+        cloudEntriesQuery.data === undefined ||
+        clipboardContent.data === undefined ||
+        cloudEntriesQuery.data.entries.some(
+          (cloudEntry) => cloudEntry.content === clipboardContent.data,
+        )
+      ) {
+        return;
+      }
+
+      const contentHash = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        clipboardContent.data,
+      );
+
+      const emailContentHash = `${user.email}+${contentHash}`;
+
+      const now = Date.now();
+
+      await db.transact(
+        db.tx.entries[lookup("emailContentHash", emailContentHash)]!.update({
+          createdAt: now,
+          copiedAt: now,
+          content: clipboardContent.data,
+        }).link({ $user: lookup("email", user.email) }),
+      );
+    })();
+  }, [connectionStatus, user?.email, cloudEntriesQuery.data, clipboardContent.data]);
 
   if (
     cloudEntriesQuery.isLoading ||
     cloudEntriesQuery.error ||
     settingsQuery.isPending ||
-    settingsQuery.error
+    settingsQuery.error ||
+    clipboardContent.isPending ||
+    clipboardContent.error
   ) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -141,7 +212,13 @@ export default function HomeScreen() {
             getEntryTimestamp(b, settingsQuery.data) - getEntryTimestamp(a, settingsQuery.data),
         )}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <Item cloudEntry={item} settings={settingsQuery.data} />}
+      renderItem={({ item }) => (
+        <Item
+          cloudEntry={item}
+          settings={settingsQuery.data}
+          clipboardContent={clipboardContent.data}
+        />
+      )}
     />
   );
 }
