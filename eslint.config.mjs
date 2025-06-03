@@ -30,6 +30,7 @@ export default tseslint.config(
         },
       ],
       "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true }],
     },
   },
 );
