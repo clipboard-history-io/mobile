@@ -5,9 +5,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import Swipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, {
   Extrapolation,
   interpolate,
@@ -93,13 +93,16 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
 };
 
 interface ItemProps {
+  previousRef: RefObject<SwipeableMethods | null>;
   cloudEntry: InstaQLEntity<AppSchema, "entries">;
   settings: Settings;
   clipboardContent: string;
 }
 
-const Item = ({ cloudEntry, settings, clipboardContent }: ItemProps) => {
+const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps) => {
   const queryClient = useQueryClient();
+
+  const ref = useRef<SwipeableMethods>(null);
 
   const tags = z
     .array(z.string())
@@ -109,10 +112,22 @@ const Item = ({ cloudEntry, settings, clipboardContent }: ItemProps) => {
   return (
     <>
       <Swipeable
+        ref={ref}
         overshootRight={false}
         renderRightActions={(_, translation) => (
           <RightActions translation={translation} cloudEntry={cloudEntry} />
         )}
+        onSwipeableOpen={() => {
+          previousRef.current?.close();
+          previousRef.current = ref.current;
+        }}
+        onSwipeableClose={() => {
+          if (previousRef.current !== ref.current) {
+            return;
+          }
+
+          previousRef.current = null;
+        }}
       >
         <Pressable
           onPress={() => {
@@ -211,6 +226,8 @@ export default function HomeScreen() {
   const settingsQuery = useSettingsQuery();
   const clipboardContent = useClipboardContentQuery();
 
+  const previousRef = useRef<SwipeableMethods>(null);
+
   // Create new entry if clipboard content doesn't exist.
   useEffect(() => {
     (async () => {
@@ -271,6 +288,7 @@ export default function HomeScreen() {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <Item
+          previousRef={previousRef}
           cloudEntry={item}
           settings={settingsQuery.data}
           clipboardContent={clipboardContent.data}
