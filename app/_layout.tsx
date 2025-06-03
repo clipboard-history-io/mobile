@@ -67,7 +67,7 @@ const RootStack = () => {
 
   if (auth.isLoading || auth.error || settingsQuery.isPending || settingsQuery.error) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
       </View>
     );

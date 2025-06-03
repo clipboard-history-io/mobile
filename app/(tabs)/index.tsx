@@ -55,12 +55,12 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
 
   return (
     <View className="relative w-48">
-      <Reanimated.View style={editActionStyle} className="absolute w-24 h-full">
+      <Reanimated.View style={editActionStyle} className="absolute h-full w-24">
         <Pressable onPress={() => router.push(`/entries/${cloudEntry.id}`)}>
           {({ pressed }) => (
             <View
               className={cn(
-                "flex-row items-center h-full",
+                "h-full flex-row items-center",
                 pressed ? "bg-blue-200" : "bg-blue-100",
               )}
             >
@@ -69,7 +69,7 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
           )}
         </Pressable>
       </Reanimated.View>
-      <Reanimated.View style={deleteActionStyle} className="absolute w-24 h-full">
+      <Reanimated.View style={deleteActionStyle} className="absolute h-full w-24">
         <Pressable
           onPress={() => {
             if (cloudEntry.isFavorited) {
@@ -81,7 +81,7 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
         >
           {({ pressed }) => (
             <View
-              className={cn("flex-row items-center h-full", pressed ? "bg-red-200" : "bg-red-100")}
+              className={cn("h-full flex-row items-center", pressed ? "bg-red-200" : "bg-red-100")}
             >
               <Text className="w-full text-center font-bold text-red-500">Delete</Text>
             </View>
@@ -135,8 +135,8 @@ const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps
             queryClient.setQueryData(["clipboardContent"], () => cloudEntry.content);
           }}
         >
-          <View className="bg-background flex-col px-5 py-3 gap-1">
-            <View className="flex-row justify-between items-center gap-2">
+          <View className="flex-col gap-1 bg-background px-5 py-3">
+            <View className="flex-row items-center justify-between gap-2">
               <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
@@ -168,7 +168,7 @@ const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps
                 )}
               </Text>
             </View>
-            <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center justify-between">
               <View className="flex-row gap-2">
                 <Text
                   className={cn(
@@ -271,7 +271,7 @@ export default function HomeScreen() {
     clipboardContent.error
   ) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
       </View>
     );

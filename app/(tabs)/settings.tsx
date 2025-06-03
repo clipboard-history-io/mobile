@@ -24,7 +24,7 @@ export default function SettingsScreen() {
 
   if (settingsQuery.isPending || settingsQuery.error) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
       </View>
     );
@@ -55,7 +55,7 @@ export default function SettingsScreen() {
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue
-                className="text-foreground text-sm native:text-lg"
+                className="native:text-lg text-sm text-foreground"
                 placeholder="Select..."
               />
             </SelectTrigger>
@@ -98,7 +98,7 @@ export default function SettingsScreen() {
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue
-                className="text-foreground text-sm native:text-lg"
+                className="native:text-lg text-sm text-foreground"
                 placeholder="Select..."
               />
             </SelectTrigger>

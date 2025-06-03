@@ -65,10 +65,10 @@ export default function SignInScreen() {
             style={{ width: 72, height: 72 }}
             className="mx-auto"
           />
-          <Text className="text-2xl font-bold text-center">
+          <Text className="text-center text-2xl font-bold">
             Sign in to Clipboard History IO Pro
           </Text>
-          <Text className="text-lg text-gray-500 text-center">
+          <Text className="text-center text-lg text-gray-500">
             Welcome! Please enter your email to continue
           </Text>
           <Controller
