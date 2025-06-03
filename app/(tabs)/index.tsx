@@ -4,6 +4,7 @@ import { generateColorRGB } from "@marko19907/string-to-color";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import * as Crypto from "expo-crypto";
+import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -32,6 +33,8 @@ interface RightActionsProps {
 }
 
 const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
+  const router = useRouter();
+
   const editActionStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -53,9 +56,18 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
   return (
     <View className="relative w-48">
       <Reanimated.View style={editActionStyle} className="absolute w-24 h-full">
-        <View className="flex-row items-center h-full bg-blue-100">
-          <Text className="w-full text-center font-bold text-blue-500">Edit</Text>
-        </View>
+        <Pressable onPress={() => router.push(`/entries/${cloudEntry.id}`)}>
+          {({ pressed }) => (
+            <View
+              className={cn(
+                "flex-row items-center h-full",
+                pressed ? "bg-blue-200" : "bg-blue-100",
+              )}
+            >
+              <Text className="w-full text-center font-bold text-blue-500">Edit</Text>
+            </View>
+          )}
+        </Pressable>
       </Reanimated.View>
       <Reanimated.View style={deleteActionStyle} className="absolute w-24 h-full">
         <Pressable
