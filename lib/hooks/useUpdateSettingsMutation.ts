@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { defaultSettings, Settings } from "../types/settings";
+import { Settings } from "../types/settings";
 
 export const useUpdateSettingsMutation = () => {
   const queryClient = useQueryClient();
