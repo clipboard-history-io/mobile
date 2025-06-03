@@ -3,7 +3,7 @@ import "~/global.css";
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { ActivityIndicator, Appearance, AppState, Platform, View } from "react-native";
@@ -59,6 +59,7 @@ export default function RootLayout() {
 }
 
 const RootStack = () => {
+  const router = useRouter();
   const { isDarkColorScheme } = useColorScheme();
 
   const auth = db.useAuth();
@@ -73,16 +74,18 @@ const RootStack = () => {
     );
   }
 
+  if (auth.user === null) {
+    router.replace("/sign-in");
+  }
+
   return (
     <GestureHandlerRootView>
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
         <Stack>
-          {auth.user ? (
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          ) : (
-            <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-          )}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Home" }} />
+          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          <Stack.Screen name="entries/[entryId]/index" options={{ title: "Edit Entry" }} />
         </Stack>
         <PortalHost />
       </ThemeProvider>
