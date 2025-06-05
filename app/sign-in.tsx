@@ -68,7 +68,7 @@ export default function SignInScreen() {
           <Text className="text-center text-2xl font-bold">
             Sign in to Clipboard History IO Pro
           </Text>
-          <Text className="text-center text-lg text-muted-foreground mb-4">
+          <Text className="mb-4 text-center text-lg text-muted-foreground">
             Welcome! Please enter your email to continue
           </Text>
           <Controller

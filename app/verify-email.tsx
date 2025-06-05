@@ -62,7 +62,7 @@ export default function VerifyEmailScreen() {
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View className="flex-1 justify-center px-8">
           <Text className="text-center text-2xl font-bold">Check your email</Text>
-          <Text className="text-center text-lg text-muted-foreground mb-4">
+          <Text className="mb-4 text-center text-lg text-muted-foreground">
             to continue to Clipboard History IO Pro
           </Text>
           {/* TODO: Pin input UI. */}

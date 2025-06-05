@@ -1,10 +1,11 @@
-import * as AlertDialogPrimitive from '@rn-primitives/alert-dialog';
-import * as React from 'react';
-import { Platform, View, type ViewProps } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { buttonTextVariants, buttonVariants } from '~/components/ui/button';
-import { cn } from '~/lib/utils';
-import { TextClassContext } from '~/components/ui/text';
+import * as AlertDialogPrimitive from "@rn-primitives/alert-dialog";
+import * as React from "react";
+import { Platform, View, type ViewProps } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+
+import { buttonTextVariants, buttonVariants } from "~/components/ui/button";
+import { TextClassContext } from "~/components/ui/text";
+import { cn } from "~/lib/utils";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -22,9 +23,9 @@ function AlertDialogOverlayWeb({
   return (
     <AlertDialogPrimitive.Overlay
       className={cn(
-        'z-50 bg-black/80 flex justify-center items-center p-2 absolute top-0 right-0 bottom-0 left-0',
-        open ? 'web:animate-in web:fade-in-0' : 'web:animate-out web:fade-out-0',
-        className
+        "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-black/80 p-2",
+        open ? "web:animate-in web:fade-in-0" : "web:animate-out web:fade-out-0",
+        className,
       )}
       {...props}
     />
@@ -41,8 +42,8 @@ function AlertDialogOverlayNative({
   return (
     <AlertDialogPrimitive.Overlay
       className={cn(
-        'z-50 absolute top-0 right-0 bottom-0 left-0 bg-black/80 flex justify-center items-center p-2',
-        className
+        "absolute bottom-0 left-0 right-0 top-0 z-50 flex items-center justify-center bg-black/80 p-2",
+        className,
       )}
       {...props}
       asChild
@@ -74,11 +75,11 @@ function AlertDialogContent({
       <AlertDialogOverlay>
         <AlertDialogPrimitive.Content
           className={cn(
-            'z-50 max-w-lg gap-4 border border-border bg-background p-6 shadow-lg shadow-foreground/10 web:duration-200 rounded-lg',
+            "z-50 max-w-lg gap-4 rounded-lg border border-border bg-background p-6 shadow-lg shadow-foreground/10 web:duration-200",
             open
-              ? 'web:animate-in web:fade-in-0 web:zoom-in-95'
-              : 'web:animate-out web:fade-out-0 web:zoom-out-95',
-            className
+              ? "web:animate-in web:fade-in-0 web:zoom-in-95"
+              : "web:animate-out web:fade-out-0 web:zoom-out-95",
+            className,
           )}
           {...props}
         />
@@ -88,13 +89,13 @@ function AlertDialogContent({
 }
 
 function AlertDialogHeader({ className, ...props }: ViewProps) {
-  return <View className={cn('flex flex-col gap-2', className)} {...props} />;
+  return <View className={cn("flex flex-col gap-2", className)} {...props} />;
 }
 
 function AlertDialogFooter({ className, ...props }: ViewProps) {
   return (
     <View
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2', className)}
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
       {...props}
     />
   );
@@ -108,7 +109,7 @@ function AlertDialogTitle({
 }) {
   return (
     <AlertDialogPrimitive.Title
-      className={cn('text-lg native:text-xl text-foreground font-semibold', className)}
+      className={cn("native:text-xl text-lg font-semibold text-foreground", className)}
       {...props}
     />
   );
@@ -122,7 +123,7 @@ function AlertDialogDescription({
 }) {
   return (
     <AlertDialogPrimitive.Description
-      className={cn('text-sm native:text-base text-muted-foreground', className)}
+      className={cn("native:text-base text-sm text-muted-foreground", className)}
       {...props}
     />
   );
@@ -148,9 +149,9 @@ function AlertDialogCancel({
   ref?: React.RefObject<AlertDialogPrimitive.CancelRef>;
 }) {
   return (
-    <TextClassContext.Provider value={buttonTextVariants({ className, variant: 'outline' })}>
+    <TextClassContext.Provider value={buttonTextVariants({ className, variant: "outline" })}>
       <AlertDialogPrimitive.Cancel
-        className={cn(buttonVariants({ variant: 'outline', className }))}
+        className={cn(buttonVariants({ variant: "outline", className }))}
         {...props}
       />
     </TextClassContext.Provider>

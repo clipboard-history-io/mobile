@@ -32,7 +32,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView className="px-5 py-3">
-      <Text className="text-base font-semibold mb-2">General</Text>
+      <Text className="mb-2 text-base font-semibold">General</Text>
       <Card className="mb-2">
         <CardHeader className="px-5 py-3">
           <CardTitle className="text-base font-semibold">Sort Items By</CardTitle>
@@ -77,7 +77,7 @@ export default function SettingsScreen() {
           </Select>
         </CardContent>
       </Card>
-      <Text className="text-base font-semibold mb-2">Interface</Text>
+      <Text className="mb-2 text-base font-semibold">Interface</Text>
       <Card>
         <CardHeader className="px-5 py-3">
           <CardTitle className="text-base font-semibold">Theme</CardTitle>
