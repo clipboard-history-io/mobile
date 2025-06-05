@@ -63,19 +63,19 @@ export default function SignInScreen() {
           <Image
             source={require("~/assets/images/icon.png")}
             style={{ width: 72, height: 72 }}
-            className="mx-auto"
+            className="mx-auto mb-4"
           />
           <Text className="text-center text-2xl font-bold">
             Sign in to Clipboard History IO Pro
           </Text>
-          <Text className="text-center text-lg text-gray-500">
+          <Text className="text-center text-lg text-muted-foreground mb-4">
             Welcome! Please enter your email to continue
           </Text>
           <Controller
             name="email"
             control={control}
             render={({ field: { value, onChange, onBlur, name } }) => (
-              <>
+              <View className="mb-4">
                 <Label nativeID={name}>Email address</Label>
                 <Input
                   aria-labelledby={name}
@@ -89,7 +89,7 @@ export default function SignInScreen() {
                 {errors.email?.message && (
                   <Text className="text-md font-semibold text-red-500">{errors.email.message}</Text>
                 )}
-              </>
+              </View>
             )}
           />
           <Button onPress={() => handleSubmit(onSubmit)()} className="w-full">

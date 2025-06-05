@@ -56,7 +56,7 @@ const RightActions = ({ translation, cloudEntry }: RightActionsProps) => {
   return (
     <View className="relative w-48">
       <Reanimated.View style={editActionStyle} className="absolute h-full w-24">
-        <Pressable onPress={() => router.push(`/entries/${cloudEntry.id}`)}>
+        <Pressable onPress={() => router.navigate(`/entries/${cloudEntry.id}`)}>
           {({ pressed }) => (
             <View
               className={cn(

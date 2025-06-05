@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Label } from "@rn-primitives/select";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -13,6 +12,7 @@ import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Text } from "~/components/ui/text";
 import { db } from "~/lib/db";
 
@@ -62,7 +62,7 @@ export default function VerifyEmailScreen() {
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View className="flex-1 justify-center px-8">
           <Text className="text-center text-2xl font-bold">Check your email</Text>
-          <Text className="text-center text-lg text-gray-500">
+          <Text className="text-center text-lg text-muted-foreground mb-4">
             to continue to Clipboard History IO Pro
           </Text>
           {/* TODO: Pin input UI. */}
@@ -70,7 +70,7 @@ export default function VerifyEmailScreen() {
             name="code"
             control={control}
             render={({ field: { value, onChange, onBlur, name } }) => (
-              <>
+              <View className="mb-4">
                 <Label nativeID={name}>Verification code</Label>
                 <Input
                   aria-labelledby={name}
@@ -85,7 +85,7 @@ export default function VerifyEmailScreen() {
                   // TODO: text-md doesn't exist.
                   <Text className="text-md font-semibold text-red-500">{errors.code.message}</Text>
                 )}
-              </>
+              </View>
             )}
           />
           <Button onPress={() => handleSubmit(onSubmit)()} className="w-full">

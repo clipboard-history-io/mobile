@@ -3,17 +3,15 @@ import "~/global.css";
 import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
 import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { ActivityIndicator, Appearance, AppState, Platform, View } from "react-native";
+import { Appearance, AppState, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
-import { db } from "~/lib/db";
 import { useColorScheme } from "~/lib/hooks/useColorScheme";
-import { useSettingsQuery } from "~/lib/hooks/useSettingsQuery";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -38,6 +36,8 @@ const usePlatformSpecificSetup = Platform.select({
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
+  const { isDarkColorScheme } = useColorScheme();
+
   usePlatformSpecificSetup();
 
   // https://tanstack.com/query/latest/docs/framework/react/react-native#refetch-on-app-focus
@@ -53,45 +53,23 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RootStack />
+      <GestureHandlerRootView>
+        <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+          <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Home" }} />
+            <Stack.Screen name="entries/[entryId]/index" options={{ title: "Edit Entry" }} />
+            <Stack.Screen name="account" options={{ title: "Account" }} />
+            <Stack.Screen name="sign-in" options={{ headerShown: false, title: "Sign In" }} />
+            <Stack.Screen name="verify-email" options={{ title: "Verify Email" }} />
+          </Stack>
+          <PortalHost />
+        </ThemeProvider>
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }
-
-const RootStack = () => {
-  const router = useRouter();
-  const { isDarkColorScheme } = useColorScheme();
-
-  const auth = db.useAuth();
-  // Syncs nativewind colorScheme to theme stored in settings.
-  const settingsQuery = useSettingsQuery();
-
-  if (auth.isLoading || auth.error || settingsQuery.isPending || settingsQuery.error) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (auth.user === null) {
-    router.replace("/sign-in");
-  }
-
-  return (
-    <GestureHandlerRootView>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Home" }} />
-          <Stack.Screen name="sign-in" options={{ headerShown: false }} />
-          <Stack.Screen name="entries/[entryId]/index" options={{ title: "Edit Entry" }} />
-        </Stack>
-        <PortalHost />
-      </ThemeProvider>
-    </GestureHandlerRootView>
-  );
-};
 
 const useIsomorphicLayoutEffect =
   Platform.OS === "web" && typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;

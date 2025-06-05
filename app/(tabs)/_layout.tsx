@@ -2,6 +2,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import { Image, View } from "react-native";
 
+import { SmartAvatar } from "~/components/SmartAvatar";
 import { Badge } from "~/components/ui/badge";
 import { Text } from "~/components/ui/text";
 
@@ -22,10 +23,15 @@ export default function TabLayout() {
           ),
           headerTitle: () => (
             <View className="flex-row items-center gap-2">
-              <Text className="text-lg font-semibold">Clipboard History IO</Text>
+              <Text className="text-lg font-bold">Clipboard History IO</Text>
               <Badge className="bg-cyan-300">
                 <Text>PRO</Text>
               </Badge>
+            </View>
+          ),
+          headerRight: () => (
+            <View className="mr-5">
+              <SmartAvatar />
             </View>
           ),
           headerStyle: {
@@ -37,6 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
+          title: "Settings",
           headerTitle: () => <Text className="text-lg font-semibold">Settings</Text>,
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
         }}

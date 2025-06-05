@@ -31,14 +31,14 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView>
-      <Text>General</Text>
-      <Card>
-        <CardHeader>
-          <CardTitle>Sort Items By</CardTitle>
+    <ScrollView className="px-5 py-3">
+      <Text className="text-base font-semibold mb-2">General</Text>
+      <Card className="mb-2">
+        <CardHeader className="px-5 py-3">
+          <CardTitle className="text-base font-semibold">Sort Items By</CardTitle>
           <CardDescription>Select how items are sorted.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5">
           <Select
             value={{
               label: itemSortOptionToLabel(settingsQuery.data.sortItemsBy),
@@ -77,13 +77,13 @@ export default function SettingsScreen() {
           </Select>
         </CardContent>
       </Card>
-      <Text>Interface</Text>
+      <Text className="text-base font-semibold mb-2">Interface</Text>
       <Card>
-        <CardHeader>
-          <CardTitle>Theme</CardTitle>
+        <CardHeader className="px-5 py-3">
+          <CardTitle className="text-base font-semibold">Theme</CardTitle>
           <CardDescription>Select the app's color scheme.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5">
           <Select
             value={{
               label: colorSchemeToLabel(settingsQuery.data.theme),
