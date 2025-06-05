@@ -1,12 +1,16 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import { Image, View } from "react-native";
 
 import { SmartAvatar } from "~/components/SmartAvatar";
 import { Badge } from "~/components/ui/badge";
 import { Text } from "~/components/ui/text";
+import { useSubscriptionsQuery } from "~/lib/hooks/useSubscriptionsQuery";
+import { House } from "~/lib/icons/House";
+import { Settings } from "~/lib/icons/Settings";
 
 export default function TabLayout() {
+  const subscriptionsQuery = useSubscriptionsQuery();
+
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
       <Tabs.Screen
@@ -24,9 +28,11 @@ export default function TabLayout() {
           headerTitle: () => (
             <View className="flex-row items-center gap-2">
               <Text className="text-lg font-bold">Clipboard History IO</Text>
-              <Badge className="bg-cyan-300">
-                <Text>PRO</Text>
-              </Badge>
+              {!!subscriptionsQuery.data?.subscriptions.length && (
+                <Badge className="bg-cyan-300">
+                  <Text>PRO</Text>
+                </Badge>
+              )}
             </View>
           ),
           headerRight: () => (
@@ -37,7 +43,7 @@ export default function TabLayout() {
           headerStyle: {
             height: 128,
           },
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
+          tabBarIcon: ({ color }) => <House color={color} />,
         }}
       />
       <Tabs.Screen
@@ -45,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           headerTitle: () => <Text className="text-lg font-semibold">Settings</Text>,
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+          tabBarIcon: ({ color }) => <Settings color={color} />,
         }}
       />
     </Tabs>

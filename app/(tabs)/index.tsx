@@ -1,4 +1,3 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { InstaQLEntity, lookup } from "@instantdb/react-native";
 import { generateColorRGB } from "@marko19907/string-to-color";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import * as Clipboard from "expo-clipboard";
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
 import { RefObject, useEffect, useRef } from "react";
-import { ActivityIndicator, FlatList, Pressable, View } from "react-native";
+import { ActivityIndicator, FlatList, Linking, Pressable, View } from "react-native";
 import Swipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, {
   Extrapolation,
@@ -17,13 +16,21 @@ import Reanimated, {
 import { z } from "zod";
 
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { AppSchema } from "~/instant.schema";
 import { db } from "~/lib/db";
 import { useClipboardContentQuery } from "~/lib/hooks/useClipboardContentQuery";
 import { useCloudEntriesQuery } from "~/lib/hooks/useCloudEntriesQuery";
+import { useColorScheme } from "~/lib/hooks/useColorScheme";
 import { useSettingsQuery } from "~/lib/hooks/useSettingsQuery";
+import { useSubscriptionsQuery } from "~/lib/hooks/useSubscriptionsQuery";
+import { Ellipsis } from "~/lib/icons/Ellipsis";
+import { Monitor } from "~/lib/icons/Monitor";
+import { Smartphone } from "~/lib/icons/Smartphone";
+import { Star } from "~/lib/icons/Star";
+import { Tablet } from "~/lib/icons/Tablet";
 import { Settings } from "~/lib/types/settings";
 import { badgeDateFormatter, cn, getEntryTimestamp } from "~/lib/utils";
 
@@ -100,6 +107,7 @@ interface ItemProps {
 }
 
 const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps) => {
+  const { isDarkColorScheme } = useColorScheme();
   const queryClient = useQueryClient();
 
   const ref = useRef<SwipeableMethods>(null);
@@ -205,9 +213,10 @@ const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps
                 }
               >
                 {cloudEntry.isFavorited ? (
-                  <FontAwesome size={16} name="star" color="#fcc800" />
+                  <Star size={18} stroke="#fcc800" fill="#fcc800" />
                 ) : (
-                  <FontAwesome size={16} name="star-o" />
+                  // The `stroke` property must be omitted for the icon to use the default color.
+                  <Star size={18} {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
                 )}
               </Pressable>
             </View>
@@ -220,8 +229,10 @@ const Item = ({ previousRef, cloudEntry, settings, clipboardContent }: ItemProps
 };
 
 export default function HomeScreen() {
+  const { isDarkColorScheme } = useColorScheme();
   const connectionStatus = db.useConnectionStatus();
   const { user } = db.useAuth();
+  const subscriptionsQuery = useSubscriptionsQuery();
   const cloudEntriesQuery = useCloudEntriesQuery();
   const settingsQuery = useSettingsQuery();
   const clipboardContent = useClipboardContentQuery();
@@ -234,8 +245,11 @@ export default function HomeScreen() {
       if (
         connectionStatus !== "authenticated" ||
         !user?.email ||
+        subscriptionsQuery.data === undefined ||
+        subscriptionsQuery.data.subscriptions.length === 0 ||
         cloudEntriesQuery.data === undefined ||
         clipboardContent.data === undefined ||
+        clipboardContent.data === "" ||
         cloudEntriesQuery.data.entries.some(
           (cloudEntry) => cloudEntry.content === clipboardContent.data,
         )
@@ -260,9 +274,17 @@ export default function HomeScreen() {
         }).link({ $user: lookup("email", user.email) }),
       );
     })();
-  }, [connectionStatus, user?.email, cloudEntriesQuery.data, clipboardContent.data]);
+  }, [
+    connectionStatus,
+    user?.email,
+    subscriptionsQuery.data,
+    cloudEntriesQuery.data,
+    clipboardContent.data,
+  ]);
 
   if (
+    subscriptionsQuery.isLoading ||
+    subscriptionsQuery.error ||
     cloudEntriesQuery.isLoading ||
     cloudEntriesQuery.error ||
     settingsQuery.isPending ||
@@ -273,6 +295,42 @@ export default function HomeScreen() {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (subscriptionsQuery.data.subscriptions.length === 0) {
+    return (
+      <View className="flex-1 justify-center gap-4 p-5">
+        <View className="flex-row items-center justify-center gap-2">
+          <Smartphone {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
+          <Ellipsis {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
+          <Monitor {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
+          <Ellipsis {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
+          <Tablet {...(isDarkColorScheme ? { stroke: "#ffffff" } : {})} />
+        </View>
+        <Text className="w-full text-center text-2xl font-bold">
+          Sync Your Clipboard History Everywhere
+        </Text>
+        <Text>
+          Securely sync and manage your clipboard history across all your devices with Clipboard
+          History IO Pro!
+        </Text>
+        <Text>
+          Get started now with a limited-time <Text className="font-bold">6-month</Text> free trial,
+          cancellable anytime!
+        </Text>
+        <Button
+          onPress={() =>
+            Linking.openURL(`${process.env.EXPO_PUBLIC_BASE_URL}/checkout/${user?.id}`)
+          }
+        >
+          <Text>Get Started</Text>
+        </Button>
+        <Text className="text-sm italic text-muted-foreground">
+          Your subscription helps cover cloud provider costs and supports the continued development
+          and maintenance of CHIO!
+        </Text>
       </View>
     );
   }
