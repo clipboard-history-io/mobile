@@ -76,6 +76,8 @@ export default function AccountScreen() {
                     }),
                   });
 
+                  await db.auth.signOut();
+
                   router.dismissTo("/");
                 }}
                 className="bg-destructive"
