@@ -36,7 +36,7 @@ export default function AccountScreen() {
           variant="secondary"
           onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_BASE_URL}/checkout/${user.id}`)}
         >
-          <Text>Manage Subscription</Text>
+          <Text>Manage Account</Text>
         </Button>
         <Button
           onPress={async () => {

@@ -316,10 +316,6 @@ export default function HomeScreen() {
           Securely sync and manage your clipboard history across all your devices with Clipboard
           History IO Pro!
         </Text>
-        <Text>
-          Get started now with a limited-time <Text className="font-bold">6-month</Text> free trial,
-          cancellable anytime!
-        </Text>
         <Button
           onPress={() =>
             Linking.openURL(`${process.env.EXPO_PUBLIC_BASE_URL}/checkout/${user?.id}`)
@@ -327,10 +323,6 @@ export default function HomeScreen() {
         >
           <Text>Get Started</Text>
         </Button>
-        <Text className="text-sm italic text-muted-foreground">
-          Your subscription helps cover cloud provider costs and supports the continued development
-          and maintenance of CHIO!
-        </Text>
       </View>
     );
   }
