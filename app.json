@@ -15,7 +15,11 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.andyluyoung.clipboardhistoryio",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,10 +42,10 @@
         "origin": false
       },
       "eas": {
-        "projectId": "52d56d8a-12ca-4e6e-b200-9d2b92881380"
+        "projectId": "ffd85be1-898d-48ce-b55e-f1d31c97049f"
       }
     },
-    "owner": "rhythmaich",
+    "owner": "andyluyoung",
     "runtimeVersion": {
       "policy": "appVersion"
     },
