@@ -41,6 +41,24 @@ export default function SignInScreen() {
 
   const onSubmit: SubmitHandler<FormValues> = async ({ email }) => {
     try {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}/api/token`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        const token = await res.text();
+        await db.auth.signInWithToken(token);
+
+        router.navigate("/(tabs)");
+
+        return;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    try {
       await db.auth.sendMagicCode({ email });
     } catch (e) {
       console.log(e);
