@@ -26,7 +26,7 @@ jobs:
           jq '.version = $ENV.VERSION' package.json > tmp && mv tmp package.json
           jq '.expo.version = $ENV.VERSION' app.json > tmp && mv tmp app.json
           npm install
-          npx prettier --write package.json
+          npm run format
         env:
           VERSION: ${{ inputs.version }}
 
