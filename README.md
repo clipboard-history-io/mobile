@@ -26,3 +26,7 @@ npm run dev
 - Press r to switch to Expo Go. Read the instrucitons! They are helpful.
 - Download the [Expo Go](https://expo.dev/go) mobile app from the [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent) if you are on Anroid and the [App Store](https://apps.apple.com/us/app/expo-go/id982107779) if you are on iOS.
 - Scan the QR code with the app if you are on android or using your camera, if on ios
+
+# Contributors
+
+<!-- readme: contributors -start -->

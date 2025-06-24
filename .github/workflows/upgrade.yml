@@ -1,0 +1,41 @@
+name: Upgrade
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+        required: true
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - run: |
+          ./scripts/version-check.sh
+          jq '.version = $ENV.VERSION' package.json > tmp && mv tmp package.json
+          jq '.expo.version = $ENV.VERSION' app.json > tmp && mv tmp app.json
+          npm install
+          npx prettier --write package.json
+        env:
+          VERSION: ${{ inputs.version }}
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: "v${{ inputs.version }}"
+          tag: "v${{ inputs.version }}"
+
+      - uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          branch: ${{ github.ref }}
