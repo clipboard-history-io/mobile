@@ -318,7 +318,9 @@ export default function HomeScreen() {
         </Text>
         <Button
           onPress={() =>
-            Linking.openURL(`${process.env.EXPO_PUBLIC_BASE_URL}/checkout/${user?.id}`)
+            Linking.openURL(
+              "https://chromewebstore.google.com/detail/clipboard-history-io-secu/ombhfdknibjljckajldielimdjcomcek",
+            )
           }
         >
           <Text>Get Started</Text>

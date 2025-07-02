@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ActivityIndicator, Linking, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 import {
   AlertDialog,
@@ -32,12 +32,6 @@ export default function AccountScreen() {
     <View className="flex-1 flex-col justify-between px-5 py-3">
       <View className="flex-col gap-4">
         <Text className="font-semibold">{user.email}</Text>
-        <Button
-          variant="secondary"
-          onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_BASE_URL}/checkout/${user.id}`)}
-        >
-          <Text>Manage Account</Text>
-        </Button>
         <Button
           onPress={async () => {
             await db.auth.signOut();
