@@ -63,6 +63,7 @@ export default function RootLayout() {
             <Stack.Screen name="account" options={{ title: "Account" }} />
             <Stack.Screen name="sign-in" options={{ headerShown: false, title: "Sign In" }} />
             <Stack.Screen name="verify-email" options={{ title: "Verify Email" }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, title: "Welcome" }} />
           </Stack>
           <PortalHost />
         </ThemeProvider>
